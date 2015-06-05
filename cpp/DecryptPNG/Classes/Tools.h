@@ -49,7 +49,24 @@ static void StreamMove(_Target &target, _Source &source, const uint32 size)
 }
 
 /**
- * 文件信息解密
+ * 信息加密
+ */
+void EncryptFileInfo(std::stringstream &ss, const std::array<unsigned char, KEY_SIZE> &key)
+{
+	std::string out;
+	CTR_Mode<AES>::Encryption  Encryptor2(&key[0], KEY_SIZE, &key[0]);
+	StringSource(ss.str(),
+				 true,
+				 new StreamTransformationFilter(Encryptor2,
+				 new StringSink(out),
+				 BlockPaddingSchemeDef::BlockPaddingScheme::NO_PADDING,
+				 true)
+				 );
+	ss.str(std::move(out));
+}
+
+/**
+ * 信息解密
  */
 static void DecryptFileInfo(std::stringstream &ss, const std::array<unsigned char, KEY_SIZE> &key)
 {
@@ -63,5 +80,5 @@ static void DecryptFileInfo(std::stringstream &ss, const std::array<unsigned cha
 				 BlockPaddingSchemeDef::BlockPaddingScheme::NO_PADDING,
 				 true)
 				 );
-	ss.str(out);
+	ss.str(std::move(out));
 }

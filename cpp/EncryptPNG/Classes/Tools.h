@@ -62,7 +62,7 @@ void EncryptFileInfo(std::stringstream &ss, const std::array<unsigned char, KEY_
 				 BlockPaddingSchemeDef::BlockPaddingScheme::NO_PADDING,
 				 true)
 				 );
-	ss.str(out);
+	ss.str(std::move(out));
 }
 
 /**
@@ -80,5 +80,5 @@ static void DecryptFileInfo(std::stringstream &ss, const std::array<unsigned cha
 				 BlockPaddingSchemeDef::BlockPaddingScheme::NO_PADDING,
 				 true)
 				 );
-	ss.str(out);
+	ss.str(std::move(out));
 }
