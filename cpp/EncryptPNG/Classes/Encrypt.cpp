@@ -98,7 +98,7 @@ void EncryptPNG(const std::vector<std::string> &filelist, const std::array<unsig
 		char *user_data = reinterpret_cast<char *>(&pos);
 
 		// 文件信息加密
-		EncryptFileInfo(block_info, key);
+		EncryptBlockInfo(block_info, key);
 
 		// 写入文件信息
 		StreamMove(out_file, block_info, block_info.str().size());

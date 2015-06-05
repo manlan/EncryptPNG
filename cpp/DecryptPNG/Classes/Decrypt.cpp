@@ -27,7 +27,7 @@ void DecryptPNG(const std::vector<std::string> &filelist, const std::array<unsig
 		// 解密文件信息
 		auto fileinfo = ReadLarge(in_file, uint32(end_pos - sizeof(uint64) - fileinfo_pos));
 		std::string sssaasd = fileinfo.str();
-		DecryptFileInfo(fileinfo, key);
+		DecryptBlockInfo(fileinfo, key);
 
 		// 验证文件信息
 		auto infohead = ReadSome<sizeof(INFO_HEAD)>(fileinfo);

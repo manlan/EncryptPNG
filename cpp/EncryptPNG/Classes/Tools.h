@@ -51,7 +51,7 @@ static void StreamMove(_Target &target, _Source &source, const uint32 size)
 /**
 * 信息加密
 */
-void EncryptFileInfo(std::stringstream &ss, const std::array<unsigned char, KEY_SIZE> &key)
+void EncryptBlockInfo(std::stringstream &ss, const std::array<unsigned char, KEY_SIZE> &key)
 {
 	std::string out;
 	CTR_Mode<AES>::Encryption  Encryptor2(&key[0], KEY_SIZE, &key[0]);
@@ -68,7 +68,7 @@ void EncryptFileInfo(std::stringstream &ss, const std::array<unsigned char, KEY_
 /**
  * 信息解密
  */
-static void DecryptFileInfo(std::stringstream &ss, const std::array<unsigned char, KEY_SIZE> &key)
+static void DecryptBlockInfo(std::stringstream &ss, const std::array<unsigned char, KEY_SIZE> &key)
 {
 	std::string out;
 	CTR_Mode<AES>::Decryption Decryptor(&key[0], KEY_SIZE, &key[0]);
