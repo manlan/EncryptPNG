@@ -57,7 +57,12 @@ void DecryptPNG(const std::vector<std::string> &filelist, const std::array<unsig
 			// 读取数据块信息
 			Block block;
 			memcpy(&block, &ReadSome<sizeof(Block)>(block_info)[0], sizeof(Block));
-			if (block_info.peek() == block_info.eofbit) break;
+			if (block_info.peek() == block_info.eofbit)
+			{
+				out_file.clear();
+				std::cerr << "the %s file format error!" << std::endl;
+				break;
+			}
 
 			// 写入数据块长度
 			char reverse_size[sizeof(block.size)];
