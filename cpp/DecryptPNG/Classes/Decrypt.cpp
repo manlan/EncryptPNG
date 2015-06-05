@@ -21,16 +21,16 @@ void DecryptPNG(const std::vector<std::string> &filelist, const std::array<unsig
 		// 读取文件信息位置
 		uint64 end_pos = in_file.tellg();
 		in_file.seekg(end_pos - sizeof(uint64));
-		uint64 fileinfo_pos = *reinterpret_cast<uint64 *>(&(ReadSome<sizeof(uint64)>(in_file)[0]));
-		in_file.seekg(fileinfo_pos);
+		uint64 block_start_pos = *reinterpret_cast<uint64 *>(&(ReadSome<sizeof(uint64)>(in_file)[0]));
+		in_file.seekg(block_start_pos);
 
 		// 解密文件信息
-		auto fileinfo = ReadLarge(in_file, uint32(end_pos - sizeof(uint64) - fileinfo_pos));
-		std::string sssaasd = fileinfo.str();
-		DecryptBlockInfo(fileinfo, key);
+		auto block_info = ReadLarge(in_file, uint32(end_pos - sizeof(uint64) - block_start_pos));
+		std::string sssaasd = block_info.str();
+		DecryptBlockInfo(block_info, key);
 
 		// 验证文件信息
-		auto infohead = ReadSome<sizeof(INFO_HEAD)>(fileinfo);
+		auto infohead = ReadSome<sizeof(INFO_HEAD)>(block_info);
 		for (unsigned int i = 0; i < infohead.size(); ++i)
 		{
 			if (infohead[i] != INFO_HEAD[i])
@@ -56,8 +56,8 @@ void DecryptPNG(const std::vector<std::string> &filelist, const std::array<unsig
 		{
 			// 读取数据块信息
 			Block block;
-			memcpy(&block, &ReadSome<sizeof(Block)>(fileinfo)[0], sizeof(Block));
-			if (fileinfo.peek() == fileinfo.eofbit) break;
+			memcpy(&block, &ReadSome<sizeof(Block)>(block_info)[0], sizeof(Block));
+			if (block_info.peek() == block_info.eofbit) break;
 
 			// 写入数据块长度
 			char reverse_size[sizeof(block.size)];
@@ -74,7 +74,7 @@ void DecryptPNG(const std::vector<std::string> &filelist, const std::array<unsig
 			{
 				IHDRBlock ihdr;
 				memcpy(&ihdr, &block, sizeof(Block));
-				memcpy(((char *)&ihdr) + sizeof(Block), &ReadSome<sizeof(IHDRBlock) - sizeof(Block)>(fileinfo)[0], sizeof(IHDRBlock) - sizeof(Block));
+				memcpy(((char *)&ihdr) + sizeof(Block), &ReadSome<sizeof(IHDRBlock) - sizeof(Block)>(block_info)[0], sizeof(IHDRBlock) - sizeof(Block));
 				WriteToSteam(ihdr.data, sizeof(ihdr.data), out_file);
 			}
 			else if (strcmp(s_name.c_str(), "IEND") == 0)

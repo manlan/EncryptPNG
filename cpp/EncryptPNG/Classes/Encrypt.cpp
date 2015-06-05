@@ -9,7 +9,7 @@
  * 写入单个文件数据
  * @param filename 文件名称
  * @param outstream 输出文件流
- * @param fileinfo 输出块信息
+ * @param blockinfo 输出块信息
  */
 void WriteFileData(const std::string &filename, std::ofstream &outstream, std::stringstream &blockinfo)
 {
