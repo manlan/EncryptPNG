@@ -30,10 +30,10 @@ void DecryptPNG(const std::vector<std::string> &filelist, const std::array<unsig
 		DecryptBlockInfo(block_info, key);
 
 		// 验证文件信息
-		auto infohead = ReadSome<sizeof(INFO_HEAD)>(block_info);
+		auto infohead = ReadSome<sizeof(BLOCK_HEAD)>(block_info);
 		for (unsigned int i = 0; i < infohead.size(); ++i)
 		{
-			if (infohead[i] != INFO_HEAD[i])
+			if (infohead[i] != BLOCK_HEAD[i])
 			{
 				std::cerr << "密钥错误，解密" << filename << " 失败！" << std::endl;
 				continue;

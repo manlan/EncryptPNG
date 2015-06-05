@@ -79,7 +79,7 @@ void EncryptPNG(const std::vector<std::string> &filelist, const std::array<unsig
 	for (auto &filename : filelist)
 	{
 		// 文件信息头部
-		for (auto ch : INFO_HEAD) block_info.put(ch);
+		for (auto ch : BLOCK_HEAD) block_info.put(ch);
 
 		// 写入文件数据
 		std::string out_path = path::splitext(filename)[0] + ".epng";
