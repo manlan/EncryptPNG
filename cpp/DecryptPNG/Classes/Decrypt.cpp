@@ -89,7 +89,7 @@ void DecryptPNG(const std::vector<std::string> &filelist, const aes_key &key)
 			}
 			else
 			{
-				in_file.seekg(block.pos - read_size);
+				in_file.seekg(read_size);
 				StreamMove(out_file, in_file, block.size + CRC_SIZE);
 				read_size += block.size + CRC_SIZE;
 			}

@@ -10,7 +10,7 @@
  * @param outstream 输出文件流
  * @param blockinfo 输出块信息
  */
-void WriteFileData(const std::string &filename, std::ofstream &outstream, std::stringstream &blockinfo)
+void WriteFileData(const std::string &filename, std::ofstream &outstream, std::stringstream &block_info)
 {
 	std::ifstream file;
 	file.open(filename, std::ios::binary);
@@ -52,19 +52,16 @@ void WriteFileData(const std::string &filename, std::ofstream &outstream, std::s
 			IHDRBlock ihdr;
 			ihdr.block = block;
 			memcpy(ihdr.data, block_data.str().c_str(), sizeof(ihdr.data));
-			char *user_data = reinterpret_cast<char *>(&ihdr);
-			for (unsigned int i = 0; i < sizeof(IHDRBlock); ++i) blockinfo.put(user_data[i]);
+			WriteToSteam(&ihdr, sizeof(IHDRBlock), block_info);
 		}
 		else if (strcmp(s_name.c_str(), "IEND") == 0)
 		{
-			char *user_data = reinterpret_cast<char *>(&block);
-			for (unsigned int i = 0; i < sizeof(Block); ++i) blockinfo.put(user_data[i]);
+			WriteToSteam(&block, sizeof(Block), block_info);
 		}
 		else if (strcmp(s_name.c_str(), "PLTE") == 0 || strcmp(s_name.c_str(), "IDAT") == 0)
 		{
-			char *user_data = reinterpret_cast<char *>(&block);
-			for (int i = 0; i < sizeof(Block); ++i) blockinfo.put(user_data[i]);
-			for (unsigned int i = 0; i < block_size + CRC_SIZE; ++i) outstream.put(block_data.get());
+			WriteToSteam(&block, sizeof(Block), block_info);
+			StreamMove(outstream, block_data, block_size + CRC_SIZE);
 		}
 	}
 }
