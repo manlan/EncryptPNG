@@ -1,11 +1,10 @@
 ﻿#pragma once
 
 #include <array>
+#include <vector>
 #include <sstream>
-#include <Struct.h>
-#include "cryptopp/osrng.h"  
-#include "cryptopp/modes.h"
-using namespace CryptoPP;
+#include "AES.h"
+#include "Struct.h"
 
 /**
  * 从流中读取一些数据
@@ -33,7 +32,7 @@ static std::stringstream ReadLarge(_Stream &stream, const int readsize)
  * 将数据写到流中
  */
 template <typename _Stream>
-static void WriteToSteam(const void *data, uint32 size, _Stream &stream)
+static void WriteToSteam(const void *data, uint32_t size, _Stream &stream)
 {
 	unsigned char *p = reinterpret_cast<unsigned char *>(const_cast<void *>(data));
 	for (unsigned int i = 0; i < size; ++i) stream.put(p[i]);
@@ -43,42 +42,37 @@ static void WriteToSteam(const void *data, uint32 size, _Stream &stream)
  * 移动流数据到另一个流
  */
 template <typename _Source, typename _Target>
-static void StreamMove(_Target &target, _Source &source, const uint32 size)
+static void StreamMove(_Target &target, _Source &source, const uint32_t size)
 {
-	for (uint64 i = 0; i < size; ++i) target.put(source.get());
+	for (uint64_t i = 0; i < size; ++i) target.put(source.get());
 }
 
 /**
-* 信息加密
-*/
-void EncryptBlockInfo(std::stringstream &ss, const std::array<unsigned char, KEY_SIZE> &key)
-{
-	std::string out;
-	CTR_Mode<AES>::Encryption  Encryptor2(&key[0], KEY_SIZE, &key[0]);
-	StringSource(ss.str(),
-				 true,
-				 new StreamTransformationFilter(Encryptor2,
-				 new StringSink(out),
-				 BlockPaddingSchemeDef::BlockPaddingScheme::NO_PADDING,
-				 true)
-				 );
-	ss.str(out);
-}
-
-/**
- * 信息解密
+ * 数据块加密
  */
-static void DecryptBlockInfo(std::stringstream &ss, const std::array<unsigned char, KEY_SIZE> &key)
+static void EncryptBlock(std::stringstream &ss, const aes_key &key)
 {
-	std::string out;
-	CTR_Mode<AES>::Decryption Decryptor(&key[0], KEY_SIZE, &key[0]);
+	const std::streamoff contents_size = ss.tellp() - ss.tellg();
+	const uint32_t block_size = (uint32_t)(contents_size + AES_BLOCK_SIZE - contents_size % AES_BLOCK_SIZE);
+	std::vector<uint8_t> buffer;
+	buffer.resize(block_size);
+	for (uint32_t i = 0; i < contents_size; ++i) buffer[i] = ss.get();
+	AES::EncryptData(&buffer[0], block_size, key);
+	ss.seekg(0); ss.seekp(0);
+	for (uint32_t i = 0; i < block_size; ++i) ss.put(buffer[i]);
+}
 
-	StringSource(ss.str(),
-				 true,
-				 new StreamTransformationFilter(Decryptor,
-				 new StringSink(out),
-				 BlockPaddingSchemeDef::BlockPaddingScheme::NO_PADDING,
-				 true)
-				 );
-	ss.str(out);
+/**
+ * 数据块解密
+ */
+static void DecryptBlock(std::stringstream &ss, const aes_key &key)
+{
+	const std::streamoff contents_size = ss.tellp() - ss.tellg();
+	const uint32_t block_size = (uint32_t)(contents_size + AES_BLOCK_SIZE - contents_size % AES_BLOCK_SIZE);
+	std::vector<uint8_t> buffer;
+	buffer.resize(block_size);
+	for (uint32_t i = 0; i < contents_size; ++i) buffer[i] = ss.get();
+	AES::DecryptData(&buffer[0], block_size, key);
+	ss.seekg(0); ss.seekp(0);
+	for (uint32_t i = 0; i < block_size; ++i) ss.put(buffer[i]);
 }

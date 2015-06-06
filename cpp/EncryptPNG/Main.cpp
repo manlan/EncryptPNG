@@ -5,7 +5,7 @@
 int main()
 {
 	// ÊäÈëÃÜÔ¿
-	std::array<unsigned char, KEY_SIZE> key = { 0 };
+	aes_key key = { 0 };
 	std::cout << "ÇëÊäÈë16Î»ÃÜÔ¿£º" << std::endl;
 	std::cin.get((char *)&key[0], key.size());
 

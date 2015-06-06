@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <iostream>
-#include "Tools.h"
 #include "Files.h"
 
 /**
@@ -71,7 +70,7 @@ void WriteFileData(const std::string &filename, std::ofstream &outstream, std::s
 }
 
 // 加密PNG图片
-void EncryptPNG(const std::vector<std::string> &filelist, const std::array<unsigned char, KEY_SIZE> &key)
+void EncryptPNG(const std::vector<std::string> &filelist, const aes_key &key)
 {
 	std::ofstream out_file;
 	std::stringstream block_info;
@@ -86,27 +85,29 @@ void EncryptPNG(const std::vector<std::string> &filelist, const std::array<unsig
 		out_file.open(out_path, std::ios::binary);
 		if (!out_file.is_open())
 		{
-			std::cerr << "创建" << filename << " 失败！" << std::endl;
 			out_file.close();
 			block_info.str("");
+			block_info.clear();
+			std::cerr << "创建" << filename << " 失败！" << std::endl;
 			continue;
 		}
 		WriteFileData(filename, out_file, block_info);
 
-		// 记录信息位置
-		uint64 pos = out_file.tellp();
+		// 记录起始位置
+		uint64_t pos = out_file.tellp();
 		char *user_data = reinterpret_cast<char *>(&pos);
 
-		// 文件信息加密
-		EncryptBlockInfo(block_info, key);
+		// 数据块信息加密
+		EncryptBlock(block_info, key);
 
-		// 写入文件信息
-		StreamMove(out_file, block_info, block_info.str().size());
-		for (unsigned int i = 0; i < sizeof(uint64); ++i) out_file.put(user_data[i]);
+		// 写入数据块信息
+		StreamMove(out_file, block_info, uint32_t(block_info.tellp() - block_info.tellg()));
+		for (unsigned int i = 0; i < sizeof(uint64_t); ++i) out_file.put(user_data[i]);
 
 		std::cout << "已生成：" << out_path.c_str() << std::endl;
 
 		out_file.close();
 		block_info.str("");
+		block_info.clear();
 	}
 }

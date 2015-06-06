@@ -2,12 +2,11 @@
 
 #include <fstream>
 #include <iostream>
-#include "Tools.h"
 #include "Files.h"
 
 
 // 解密PNG图片
-void DecryptPNG(const std::vector<std::string> &filelist, const std::array<unsigned char, KEY_SIZE> &key)
+void DecryptPNG(const std::vector<std::string> &filelist, const aes_key &key)
 {
 	for (auto &filename : filelist)
 	{
@@ -18,25 +17,25 @@ void DecryptPNG(const std::vector<std::string> &filelist, const std::array<unsig
 			return;
 		}
 
-		// 读取文件信息位置
-		uint64 end_pos = in_file.tellg();
-		in_file.seekg(end_pos - sizeof(uint64));
-		uint64 block_start_pos = *reinterpret_cast<uint64 *>(&(ReadSome<sizeof(uint64)>(in_file)[0]));
+		// 读取数据块位置
+		uint64_t end_pos = in_file.tellg();
+		in_file.seekg(end_pos - sizeof(uint64_t));
+		uint64_t block_start_pos = *reinterpret_cast<uint64_t *>(&(ReadSome<sizeof(uint64_t)>(in_file)[0]));
 		in_file.seekg(block_start_pos);
 
-		// 解密文件信息
-		auto block_info = ReadLarge(in_file, uint32(end_pos - sizeof(uint64) - block_start_pos));
+		// 解密数据块信息
+		auto block_info = ReadLarge(in_file, uint32_t(end_pos - sizeof(uint64_t) - block_start_pos));
 		std::string sssaasd = block_info.str();
-		DecryptBlockInfo(block_info, key);
+		DecryptBlock(block_info, key);
 
-		// 验证文件信息
+		// 验证数据块内容
 		auto infohead = ReadSome<sizeof(BLOCK_HEAD)>(block_info);
 		for (unsigned int i = 0; i < infohead.size(); ++i)
 		{
 			if (infohead[i] != BLOCK_HEAD[i])
 			{
 				std::cerr << "密钥错误，解密" << filename << " 失败！" << std::endl;
-				continue;
+				return;
 			}
 		}
 
@@ -51,13 +50,13 @@ void DecryptPNG(const std::vector<std::string> &filelist, const std::array<unsig
 		WriteToSteam(HEAD_DATA, sizeof(HEAD_DATA), out_file);
 
 		// 读取数据块
-		uint64 read_size = 0;
+		uint64_t read_size = 0;
 		while (true)
 		{
 			// 读取数据块信息
 			Block block;
 			memcpy(&block, &ReadSome<sizeof(Block)>(block_info)[0], sizeof(Block));
-			if (block_info.peek() == block_info.eofbit)
+			if (block_info.eof())
 			{
 				out_file.clear();
 				std::cerr << "the %s file format error!" << std::endl;
