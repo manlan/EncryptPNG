@@ -13,7 +13,6 @@ int main(int argc, char *argv[])
 	{
 		files.push_back(argv[i]);
 	}
-	files.push_back("stone.epng");
 	DecryptPNG(files, key);
 	
 	return 0;

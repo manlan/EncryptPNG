@@ -58,7 +58,7 @@ void WriteFileData(const std::string &filename, std::ofstream &outstream, std::s
 		{
 			WriteToSteam(&block, sizeof(Block), block_info);
 		}
-		else if (strcmp(s_name.c_str(), "PLTE") == 0 || strcmp(s_name.c_str(), "IDAT") == 0)
+		else
 		{
 			WriteToSteam(&block, sizeof(Block), block_info);
 			StreamMove(outstream, block_data, block_size + CRC_SIZE);
