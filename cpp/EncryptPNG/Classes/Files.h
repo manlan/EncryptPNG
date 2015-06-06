@@ -26,7 +26,7 @@ namespace path
 	 */
 	static std::array<std::string, 2> splitext(const std::string &file_path)
 	{
-		auto pos = file_path.find('.');
+		auto pos = file_path.rfind('.');
 		std::array<std::string, 2> text;
 		if (std::string::npos != pos)
 		{
