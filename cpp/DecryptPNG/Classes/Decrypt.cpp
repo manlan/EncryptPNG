@@ -25,7 +25,6 @@ void DecryptPNG(const std::vector<std::string> &filelist, const aes_key &key)
 
 		// 解密数据块信息
 		auto block_info = ReadLarge(in_file, uint32_t(end_pos - sizeof(uint64_t) - block_start_pos));
-		std::string sssaasd = block_info.str();
 		DecryptBlock(block_info, key);
 
 		// 验证数据块内容
