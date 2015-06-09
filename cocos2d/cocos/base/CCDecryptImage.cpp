@@ -110,6 +110,7 @@ namespace cocos2d
 			{
 				CCAssert(false, "");
 				CCLOG("the %s file format error!", filename.c_str());
+				break;
 			}
 
 			char reverse_size[sizeof(block.size)];
